@@ -1,0 +1,9 @@
+postgres:
+  host: ${POSTGRES_HOST}
+  port: ${POSTGRES_PORT}
+  user: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
+  dbname: ${POSTGRES_DB_NAME}
+  sslmode: ${POSTGRES_SSL_MODE}
+mongo:
+  host: ${MONGO_HOST}
