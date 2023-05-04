@@ -26,8 +26,9 @@ const (
 )
 
 var (
-	env *string
-	c   = &config.Conf{}
+	env     *string
+	digital *int
+	c       = &config.Conf{}
 
 	rootCmd = cobra.Command{
 		Use: "gioco-db-migrate",
@@ -78,12 +79,12 @@ var (
 				panic(fmt.Errorf("gorm error: %w", err))
 			}
 
-			fmt.Println("Migrate Environment: " + cmd.Flags().Lookup("environment").Value.String())
+			fmt.Println("Migrate Environment: " + *env)
 			for _, op := range *ops {
-				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN balance TYPE numeric(24, 8);", op.Code+"_member_wallets"))
-				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN before_balance TYPE numeric(24, 8);", op.Code+"_member_transactions"))
-				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN amount TYPE numeric(24, 8);", op.Code+"_member_transactions"))
-				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN after_balance TYPE numeric(24, 8);", op.Code+"_member_transactions"))
+				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN balance TYPE numeric(24, %d);", op.Code+"_member_wallets", *digital))
+				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN before_balance TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
+				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN amount TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
+				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN after_balance TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
 
 				fmt.Printf("%s done.\n", op.Code)
 			}
@@ -93,6 +94,7 @@ var (
 
 func main() {
 	env = migrateCmd.Flags().StringP("environment", "e", "dev", "This flag for setting db environment. Allow: [\"dev\", \"prod\"]")
+	digital = migrateCmd.Flags().IntP("digital", "d", 8, "This flag for setting Nnd decimal place.")
 	rootCmd.AddCommand(&migrateCmd)
 	rootCmd.Execute()
 }
