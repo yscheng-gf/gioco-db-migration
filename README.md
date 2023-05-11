@@ -11,7 +11,7 @@ docker build --rm -t gioco-db-migration .
 
 執行
 ```sh
-docker run --rm gioco-db-migration
+docker run --rm --it gioco-db-migration
 ```
 
 ## Summary

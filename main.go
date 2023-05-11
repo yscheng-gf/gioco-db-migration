@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 	"github.com/yscheng-gf/gioco-db-migration/internal/config"
 	"github.com/yscheng-gf/gioco-db-migration/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -79,15 +82,32 @@ var (
 				panic(fmt.Errorf("gorm error: %w", err))
 			}
 
+			p := mpb.New(mpb.WithWidth(64))
+			bar := p.AddBar(int64(len(*ops)),
+				mpb.PrependDecorators(
+					decor.Name("Migrate", decor.WCSyncSpaceR),
+					decor.Spinner([]string{}, decor.WCSyncSpaceR),
+					decor.Percentage(decor.WCSyncSpaceR),
+				),
+				mpb.AppendDecorators(
+					decor.OnComplete(
+						decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
+					),
+				),
+			)
+
 			fmt.Println("Migrate Environment: " + *env)
 			for _, op := range *ops {
+				start := time.Now()
 				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN balance TYPE numeric(24, %d);", op.Code+"_member_wallets", *digital))
 				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN before_balance TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
 				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN amount TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
 				pgDb.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN after_balance TYPE numeric(24, %d);", op.Code+"_member_transactions", *digital))
 
-				fmt.Printf("%s done.\n", op.Code)
+				// fmt.Printf("%s done.\n", op.Code)
+				bar.EwmaIncrement(time.Since(start))
 			}
+			p.Wait()
 		},
 	}
 )
