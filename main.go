@@ -125,7 +125,7 @@ func mustLoadConfig(c *config.Conf) {
 		envFile = prodEnvFile
 	}
 	if err := godotenv.Load(envFile); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Error loading %s file", envFile)
 	}
 
 	viper.AddConfigPath(".")
