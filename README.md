@@ -1,22 +1,24 @@
 # gioco-db-migration
 
-## Usage
-使用前須先新增 `etc/.env` 和 `etc/prod.env` 這兩個檔案
+## First
+ Before using, you need to create two files named `etc/.env` and `etc/prod.env`.
 
 ## Docker
 build
 ```sh
-docker build --rm -t gioco-db-migration .
+make docker
 ```
 
-執行
+## Usage
+run flowing command:
 ```sh
-docker run --rm --it gioco-db-migration
+docker run --rm -it gioco-db-migration
 ```
 
 ## Summary
 遷移postgres db numeric(24, 2) -> numeric(24, 8)
-受影響欄位
+
+Affected fields
 - op_member_transactions
   - before_balance
   - amount
