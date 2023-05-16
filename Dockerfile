@@ -1,11 +1,11 @@
-# build env
-FROM golang:1.20.3-alpine AS build-env
+FROM golang:1.20.3-alpine AS pkg-env
 WORKDIR /app
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-FROM build-env AS build-env
+# build env
+FROM pkg-env AS build-env
 COPY . /app
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o main .
 

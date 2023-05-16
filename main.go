@@ -20,12 +20,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const (
 	configFile  = "etc/config.yaml"
 	devEnvFile  = "etc/.env"
-	prodEnvFile = "etc/prod.env"
+	prodEnvFile = "etc/.prod.env"
 )
 
 var (
@@ -77,7 +78,12 @@ var (
 				return
 			}
 
-			pgDb, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", c.Postgres.Host, c.Postgres.Port, c.Postgres.User, c.Postgres.Password, c.Postgres.DBName, c.Postgres.SslMode)))
+			pgDb, err := gorm.Open(
+				postgres.Open(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", c.Postgres.Host, c.Postgres.Port, c.Postgres.User, c.Postgres.Password, c.Postgres.DBName, c.Postgres.SslMode)),
+				&gorm.Config{
+					Logger: logger.Default.LogMode(logger.Silent),
+				},
+			)
 			if err != nil {
 				panic(fmt.Errorf("gorm error: %w", err))
 			}
