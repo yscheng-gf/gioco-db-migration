@@ -126,10 +126,16 @@ func main() {
 }
 
 func mustLoadConfig(c *config.Conf) {
-	envFile := devEnvFile
-	if *env == "prod" {
+	var envFile string
+	switch *env {
+	case "prod":
 		envFile = prodEnvFile
+	case "dev":
+		envFile = devEnvFile
+	default:
+		log.Fatalln("Error loading .env file")
 	}
+
 	if err := godotenv.Load(envFile); err != nil {
 		log.Fatalf("Error loading %s file", envFile)
 	}
