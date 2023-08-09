@@ -43,6 +43,7 @@ func main() {
 	c := &config.Conf{}
 	mustLoadConfig(c)
 	rootCmd.AddCommand(cmd.NewTransLogPrecisionMigrateCmd(c))
+	rootCmd.AddCommand(cmd.NewTransLogFeeMigrateCmd(c))
 	rootCmd.Execute()
 }
 

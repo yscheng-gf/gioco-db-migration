@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -10,8 +9,6 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 	"github.com/yscheng-gf/gioco-db-migration/helper"
 	"github.com/yscheng-gf/gioco-db-migration/internal/config"
-	"github.com/yscheng-gf/gioco-db-migration/models"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func NewTransLogPrecisionMigrateCmd(c *config.Conf) *cobra.Command {
@@ -24,15 +21,8 @@ func NewTransLogPrecisionMigrateCmd(c *config.Conf) *cobra.Command {
 			mongoCli := helper.InitMongo(c)
 			pgDb := helper.InitPgDb(c)
 
-			cursor, err := mongoCli.Database("GIOCO_PLUS").Collection("sys_operators").Find(context.TODO(), bson.M{"status": "1"})
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer cursor.Close(context.TODO())
-
-			ops := new([]models.Operator)
-			err = cursor.All(context.TODO(), ops)
+			// 取出所有 operator
+			ops, err := helper.FetchAllOperator(mongoCli)
 			if err != nil {
 				fmt.Println(err)
 				return
