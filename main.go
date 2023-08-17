@@ -44,6 +44,7 @@ func main() {
 	mustLoadConfig(c)
 	rootCmd.AddCommand(cmd.NewTransLogPrecisionMigrateCmd(c))
 	rootCmd.AddCommand(cmd.NewTransLogFeeMigrateCmd(c))
+	rootCmd.AddCommand(cmd.NewMigrateRecommenderCmd(c))
 	rootCmd.Execute()
 }
 
