@@ -14,13 +14,14 @@ import (
 )
 
 const (
-	configFile  = "etc/config.yaml"
-	devEnvFile  = "etc/.env"
-	prodEnvFile = "etc/.prod.env"
+	configFile     = "etc/config.yaml"
+	devEnvFile     = "etc/.env"
+	stagingEnvFile = "etc/.staging.env"
+	prodEnvFile    = "etc/.prod.env"
 )
 
 var (
-	env *string
+	env string
 
 	rootCmd = cobra.Command{
 		Use: "gioco-db-migration",
@@ -39,24 +40,31 @@ var (
 )
 
 func main() {
-	env = rootCmd.PersistentFlags().StringP("environment", "e", "dev", "This flag for setting db environment. Allow: [\"dev\", \"prod\"]")
+	rootCmd.PersistentFlags().StringVarP(&env, "environment", "e", "", "This flag for setting db environment. Allow: [\"dev\", \"staging\", \"prod\"]")
+	if err := rootCmd.ParseFlags(os.Args); err != nil {
+		log.Fatalln(err)
+	}
 	c := &config.Conf{}
 	mustLoadConfig(c)
 	rootCmd.AddCommand(cmd.NewTransLogPrecisionMigrateCmd(c))
 	rootCmd.AddCommand(cmd.NewTransLogFeeMigrateCmd(c))
 	rootCmd.AddCommand(cmd.NewMigrateRecommenderCmd(c))
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func mustLoadConfig(c *config.Conf) {
 	var envFile string
-	switch *env {
+	switch env {
 	case "prod":
 		envFile = prodEnvFile
+	case "staging":
+		envFile = stagingEnvFile
 	case "dev":
 		envFile = devEnvFile
 	default:
-		log.Fatalln("Error loading .env file")
+		log.Fatalf("Error loading [%s] .env file\n", env)
 	}
 
 	if err := godotenv.Load(envFile); err != nil {
